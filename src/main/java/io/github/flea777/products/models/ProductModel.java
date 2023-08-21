@@ -2,6 +2,7 @@ package io.github.flea777.products.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Table(name = "tb_products")
 @Getter
 @Setter
+@NoArgsConstructor
 public class ProductModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
