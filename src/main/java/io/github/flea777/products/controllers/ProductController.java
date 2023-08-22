@@ -35,20 +35,33 @@ public class ProductController {
     @GetMapping("/products/{id}")
     public ResponseEntity<Object> getOneProduct(@PathVariable(value = "id")UUID id) {
         Optional<ProductModel> productModel = repository.findById(id);
-        if (productModel.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(productModel.get());
-        } else return ResponseEntity.status(HttpStatus.OK).body(productModel.get());
+        return productModel.<ResponseEntity<Object>>map
+                (model -> ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(model))
+                        .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Invalid product ID"));
     }
 
-    @PutMapping
+    @PutMapping("/products/{id}")
     public ResponseEntity<Object> updateProduct(@PathVariable(value = "id") UUID id,
                                                 @RequestBody @Valid ProductDTO productDTO) {
         Optional<ProductModel> productModel = repository.findById(id);
         if (productModel.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(productModel.get());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid product ID");
         }
         var productModel1 = productModel.get();
-        BeanUtils.copyProperties(productDTO, productModel);
-        return ResponseEntity.status(HttpStatus.OK).body(productModel1);
+        BeanUtils.copyProperties(productDTO, productModel1);
+        return ResponseEntity.status(HttpStatus.OK).body(repository.save(productModel1));
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") UUID id){
+        Optional<ProductModel> productModel = repository.findById(id);
+        if (productModel.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid product ID");
+        }
+        repository.delete(productModel.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Product deleted successfully");
     }
 }
